@@ -166,36 +166,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Storage'
 
-  /transactions/pending:
-    parameters:
-      - $ref: '#/components/parameters/RawInQuery'
-      - $ref: '#/components/parameters/ExpandedTxInQuery'
-    get:
-      tags:
-        - Transactions
-      summary: Retrieve pending transactions
-      description: |
-        represents the current transaction pool
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:                        
-                  oneOf:
-                    - allOf:
-                      - $ref: '#/components/schemas/Tx'
-                      properties:
-                        meta:
-                          required: false
-                          $ref: '#/components/schemas/TxMeta'
-                    - allOf:
-                      - $ref: '#/components/schemas/RawTx'
-                      description: raw transaction
-                example: ['0x4de71f2d588aa8a1ea00fe8312d92966da424d9939a511fc0be81e65fad52af8']
-
   /transactions/{id}:
     parameters:
       - $ref: '#/components/parameters/TxIDInPath'
@@ -420,6 +390,32 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/PeerStats'
+
+  /node/txpool:
+    parameters:
+      - $ref: '#/components/parameters/ExpandedTxInQuery'
+    get:
+      tags:
+        - Node
+      summary: Retrieve pending transactions
+      description: |
+        represents the current transaction pool
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:                        
+                  oneOf:
+                    - allOf:
+                      - $ref: '#/components/schemas/Tx'
+                      properties:
+                        meta:
+                          required: false
+                          $ref: '#/components/schemas/TxMeta'
+                example: ['0x4de71f2d588aa8a1ea00fe8312d92966da424d9939a511fc0be81e65fad52af8']
 
   /subscriptions/block:
     get:

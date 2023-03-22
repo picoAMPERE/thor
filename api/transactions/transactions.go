@@ -212,64 +212,11 @@ func (t *Transactions) parseHead(head string) (thor.Bytes32, error) {
 	}
 	return h, nil
 }
- 
-func (t *Transactions) getAllTxIDsFromTxpool() ([]string, error) {
-    txs := t.pool.Executables()
-
-    txIDs := make([]string, 0, len(txs))
-    for _, tx := range txs {
-        txIDs = append(txIDs, tx.ID().String())
-    }
-
-    return txIDs, nil
-}
-
-func (t *Transactions) handleGetAllTxIDsFromTxPool(w http.ResponseWriter, req *http.Request) error {
-    raw := req.URL.Query().Get("raw")
-    expanded := req.URL.Query().Get("expanded")
-
-    if raw != "" && raw != "false" && raw != "true" {
-        return utils.BadRequest(errors.New("raw should be boolean"))
-    }
-
-    if expanded != "" && expanded != "false" && expanded != "true" {
-        return utils.BadRequest(errors.New("expanded should be boolean"))
-    }
-
-    rawBool := raw == "true"
-    expandedBool := expanded == "true"
-
-    txs := t.pool.Executables()
-    if rawBool {
-        rawTxs := make([]RawTx, 0, len(txs))
-        for _, tx := range txs {
-            raw, err := rlp.EncodeToBytes(tx)
-            if err != nil {
-                return err
-            }
-            rawTxs = append(rawTxs, RawTx{hexutil.Encode(raw)})
-        }
-        return utils.WriteJSON(w, rawTxs)
-    } else if expandedBool {
-        detailedTxs := make([]*Transaction, 0, len(txs))
-        for _, tx := range txs {
-            detailedTxs = append(detailedTxs, convertTransaction(tx, nil))
-        }
-        return utils.WriteJSON(w, detailedTxs)
-    } else {
-        txIDs := make([]string, 0, len(txs))
-        for _, tx := range txs {
-            txIDs = append(txIDs, tx.ID().String())
-        }
-        return utils.WriteJSON(w, txIDs)
-    }
-}
 
 func (t *Transactions) Mount(root *mux.Router, pathPrefix string) {
 	sub := root.PathPrefix(pathPrefix).Subrouter()
 
 	sub.Path("").Methods("POST").HandlerFunc(utils.WrapHandlerFunc(t.handleSendTransaction))
-	sub.Path("/pending").Methods("GET").HandlerFunc(utils.WrapHandlerFunc(t.handleGetAllTxIDsFromTxPool))
 	sub.Path("/{id}").Methods("GET").HandlerFunc(utils.WrapHandlerFunc(t.handleGetTransactionByID))
 	sub.Path("/{id}/receipt").Methods("GET").HandlerFunc(utils.WrapHandlerFunc(t.handleGetTransactionReceiptByID))
 }

@@ -81,7 +81,7 @@ func New(
 		Mount(router, "/transactions")
 	debug.New(repo, stater, forkConfig).
 		Mount(router, "/debug")
-	node.New(nw).
+	node.New(nw, txPool).
 		Mount(router, "/node")
 	subs := subscriptions.New(repo, origins, backtraceLimit)
 	subs.Mount(router, "/subscriptions")
